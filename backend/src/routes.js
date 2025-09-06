@@ -1,0 +1,1 @@
+//Endpoints da API (URLs que o frontend acessa)

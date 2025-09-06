@@ -1,0 +1,1 @@
+//Configurações do sistema (banco, chaves, etc)
