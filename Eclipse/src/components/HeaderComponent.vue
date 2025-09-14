@@ -56,27 +56,41 @@
       </a>
     </nav>
     <!-- Menu Icon -->
-    <button class="ml-6">
-      <svg
-        class="w-8 h-8 text-white"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-      >
-        <line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" />
-        <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" />
-        <line x1="4" y1="17" x2="20" y2="17" stroke="currentColor" />
-      </svg>
-    </button>
+    <div>
+      <Switch v-model="enabled" @click="onToggle"
+        :class="enabled ? 'bg-slate-300' : 'bg-slate-600'" class="relative
+        inline-flex h-[38px] w-[74px] shrink-0 cursor-pointer rounded-full
+        border-2 border-transparent transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75" >
+        <span class="sr-only">Use setting</span>
+        <span
+          aria-hidden="true"
+          :class="enabled ? 'translate-x-9' : 'translate-x-0'"
+          class="pointer-events-none inline-block h-[34px] w-[34px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
+        />
+      </Switch>
+    </div>
   </header>
 </template>
 
 <script>
 import logo from "@/assets/Logo1.png";
+import { Switch } from "@headlessui/vue";
+
 export default {
-  data() {
-    return { logo };
+  components: {
+    Switch,
   },
+  data() {
+    return {
+      logo,
+      enabled: true,
+    };
+  },
+  methods: {
+  onToggle() {
+    this.$emit('toggle-dark', this.enabled)
+  }
+}
 };
 </script>
