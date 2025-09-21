@@ -8,8 +8,7 @@
       <HeaderComponent @toggle-dark="toggleDarkMode" />
     </header>
 
-    <HomeCarousel />
-
+  <HomeCarousel :dark="isDark" />
   <HomeCard :dark="isDark" />
   </div>
 </template>
@@ -20,9 +19,10 @@ import lightBg from "@/assets/homebg.jpg";
 import darkBg from "@/assets/darkHomebg.jpg";
 import HomeCard from "../components/HomeCard.vue";
 import HomeCarousel from "../components/HomeCarousel.vue";
+import Sidebar from "../components/Sidebar.vue";
 
 export default {
-  components: { HeaderComponent, HomeCard, HomeCarousel },
+  components: { HeaderComponent, HomeCard, HomeCarousel, Sidebar },
   data() {
     return {
       isDark: false,

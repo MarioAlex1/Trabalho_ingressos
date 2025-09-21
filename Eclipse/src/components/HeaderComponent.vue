@@ -1,11 +1,19 @@
 <template>
-  <header class="bg-black py-3 px-4 flex items-center justify-between">
+  <header
+    class="bg-black p-2 md:p-4 flex flex-col md:flex-row items-center justify-between flex-wrap"
+  >
     <!-- Logo -->
-    <div class="flex items-center">
-      <img :src="logo" alt="Logo Eclipse" class="h-12 mr-6" />
+    <div
+      class="flex items-center mb-2 md:mb-0 md:justify-start justify-center w-full md:w-auto"
+    >
+      <img
+        :src="logo"
+        alt="Logo Eclipse"
+        class="h-14 w-14 md:h-20 md:w-32 object-contain"
+      />
     </div>
     <!-- Menu -->
-    <nav class="flex items-center space-x-6">
+    <nav class="hidden md:flex flex-row items-center space-x-6">
       <a href="#" class="text-yellow-500 underline">Início</a>
       <a href="#" class="flex items-center text-white hover:text-yellow-500">
         <span class="text-xl mr-1">＋</span> Criar evento
@@ -56,41 +64,23 @@
       </a>
     </nav>
     <!-- Menu Icon -->
-    <div>
-      <Switch v-model="enabled" @click="onToggle"
-        :class="enabled ? 'bg-slate-300' : 'bg-slate-600'" class="relative
-        inline-flex h-[38px] w-[74px] shrink-0 cursor-pointer rounded-full
-        border-2 border-transparent transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75" >
-        <span class="sr-only">Use setting</span>
-        <span
-          aria-hidden="true"
-          :class="enabled ? 'translate-x-9' : 'translate-x-0'"
-          class="pointer-events-none inline-block h-[34px] w-[34px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
-        />
-      </Switch>
+    <div class="mt-2 md:mt-0">
+      <Sidebar @toggle-dark="$emit('toggle-dark', $event)" />
     </div>
   </header>
 </template>
-
 <script>
+import Sidebar from "./Sidebar.vue";
 import logo from "@/assets/Logo1.png";
-import { Switch } from "@headlessui/vue";
 
 export default {
   components: {
-    Switch,
+    Sidebar,
   },
   data() {
     return {
       logo,
-      enabled: true,
     };
   },
-  methods: {
-  onToggle() {
-    this.$emit('toggle-dark', this.enabled)
-  }
-}
 };
 </script>
