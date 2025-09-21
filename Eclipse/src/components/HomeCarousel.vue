@@ -1,7 +1,7 @@
 <template>
-  <div class="relative max-w-3xl align-center mx-auto mt-6">
+  <div :class="['relative max-w-3xl align-center mx-auto mt-6', dark ? 'bg-gray-900' : 'bg-white']">
     <!-- Carousel wrapper -->
-    <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
+    <div :class="['relative h-56 overflow-hidden rounded-lg md:h-96 border-2', dark ? 'border-gray-800' : 'border-white']">
       <!-- Slides -->
       <div
         v-for="(location, index) in locations"
@@ -17,7 +17,7 @@
           :alt="location.name"
         />
         <!-- Overlay para melhorar contraste do texto -->
-        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+  <div :class="['absolute inset-0', dark ? 'bg-black bg-opacity-40' : 'bg-black bg-opacity-20']"></div>
       </div>
     </div>
 
@@ -45,8 +45,11 @@
       class="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
       @click="previousSlide"
     >
-      <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-        <svg class="w-4 h-4 text-white dark:text-gray-800" fill="none" viewBox="0 0 6 10">
+      <span :class="[
+        'inline-flex items-center justify-center w-10 h-10 rounded-full',
+        dark ? 'bg-gray-800/60 group-hover:bg-gray-800/80 group-focus:ring-gray-800/70' : 'bg-white/30 group-hover:bg-white/50 group-focus:ring-white'
+      ]">
+        <svg :class="['w-4 h-4', dark ? 'text-white' : 'text-gray-800']" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
         </svg>
         <span class="sr-only">Anterior</span>
@@ -58,7 +61,10 @@
       class="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
       @click="nextSlide"
     >
-      <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+      <span :class="[
+        'inline-flex items-center justify-center w-10 h-10 rounded-full',
+        dark ? 'bg-gray-800/60 group-hover:bg-gray-800/80 group-focus:ring-gray-800/70' : 'bg-white/30 group-hover:bg-white/50 group-focus:ring-white'
+      ]">
         <svg :class='["w-4 h-4", dark ? "text-white" : "text-gray-800"]' fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
@@ -80,7 +86,7 @@
         {{ currentLocation.description }}
       </p>
       <div v-if="currentLocation.capacity" class="mt-2">
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
           Capacidade: {{ currentLocation.capacity }} pessoas
         </span>
       </div>
@@ -134,6 +140,7 @@ const defaultLocations = [
 ];
 
 export default {
+
   name: "EventLocationsCarousel",
   data() {
     return {
@@ -184,6 +191,8 @@ export default {
   },
 
   methods: {
+
+
     // Método para carregar localizações do backend
     async loadLocations() {
       this.isLoading = true;
