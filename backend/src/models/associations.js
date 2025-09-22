@@ -4,14 +4,14 @@ const Ingresso = require("./ingressoSeq");
 
 // Relacionamentos
 
-// Um usuário pode ter muitos ingressos
-Usuario.hasMany(Ingresso, { foreignKey: "usuarioId" });
+Usuario.hasMany(Ingresso, { foreignKey: "usuarioId", as: "ingressos" });
+Evento.hasMany(Ingresso, { foreignKey: "eventoId", as: "ingressos" });
 
-// Um evento pode ter muitos ingressos
-Evento.hasMany(Ingresso, { foreignKey: "eventoId" });
+Ingresso.belongsTo(Usuario, { foreignKey: "usuarioId", as: "usuario" });
+Ingresso.belongsTo(Evento, { foreignKey: "eventoId", as: "evento" });
 
-// Um ingresso pertence a um usuário e a um evento
-Ingresso.belongsTo(Usuario, { foreignKey: "usuarioId" });
-Ingresso.belongsTo(Evento, { foreignKey: "eventoId" });
+// Um organizador pode criar muitos eventos
+Usuario.hasMany(Evento, { foreignKey: "organizadorId", as: "eventosCriados" });
+Evento.belongsTo(Usuario, { foreignKey: "organizadorId", as: "organizador" });
 
 module.exports = { Usuario, Evento, Ingresso };

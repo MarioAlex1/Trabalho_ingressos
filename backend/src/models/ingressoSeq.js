@@ -1,8 +1,6 @@
 // src/models/ingressoSeq.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config");
-const Usuario = require("./usuarioSeq");
-const Evento = require("./eventoSeq");
 
 const Ingresso = sequelize.define("Ingresso", {
   id: {
@@ -14,14 +12,18 @@ const Ingresso = sequelize.define("Ingresso", {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
+  },
+  preco: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
+  usado: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
 }, {
   tableName: "ingressos",
   timestamps: true
 });
-
-// relacionamento: um ingresso pertence a um usuario e a um evento
-Ingresso.belongsTo(Usuario, { foreignKey: "usuarioId" });
-Ingresso.belongsTo(Evento, { foreignKey: "eventoId" });
 
 module.exports = Ingresso;
