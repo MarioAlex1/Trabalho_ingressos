@@ -123,7 +123,7 @@ router.delete('/eventos/:id', async (req, res) => {
 // Criar ingresso (comprar ingresso)
 router.post('/ingressos', async (req, res) => {
     try {
-        const { usuarioId, eventoId } = req.body;
+        const { usuarioId, eventoId, preco } = req.body;
         
         // Verificar se o usuário existe
         const usuario = await Usuario.findByPk(usuarioId);
@@ -132,15 +132,26 @@ router.post('/ingressos', async (req, res) => {
         // Verificar se o evento existe
         const evento = await Evento.findByPk(eventoId);
         if (!evento) return res.status(404).json({ error: 'Evento não encontrado' });
+
+        // verificar capacidade
+        if (evento.capacidade <= 0){
+            return res.status(400).json({ error: 'Evento esgotado' });
+        }
         
         // Gerar código único para o ingresso
         const codigo = `${evento.id}-${usuario.id}-${Date.now()}`;
         
+        // criar ingresso
         const novoIngresso = await Ingresso.create({
             codigo,
             usuarioId,
-            eventoId
+            eventoId,
+            preco
         });
+
+        // atualizar capacidade
+        evento.capacidade -= 1;
+        await evento.save();
         
         res.status(201).json(novoIngresso);
     } catch (error) {
@@ -153,8 +164,8 @@ router.get('/ingressos', async (req, res) => {
     try {
         const ingressos = await Ingresso.findAll({
             include: [
-                { model: Usuario, attributes: ['id', 'nome', 'email'] },
-                { model: Evento, attributes: ['id', 'nome', 'data', 'local'] }
+                { model: Usuario, as: "usuario", attributes: ['id', 'nome', 'email'] },
+                { model: Evento, as: "evento", attributes: ['id', 'nome', 'data', 'local'] }
             ]
         });
         res.json(ingressos);
@@ -168,8 +179,8 @@ router.get('/ingressos/:id', async (req, res) => {
     try {
         const ingresso = await Ingresso.findByPk(req.params.id, {
             include: [
-                { model: Usuario, attributes: ['id', 'nome', 'email'] },
-                { model: Evento, attributes: ['id', 'nome', 'data', 'local', 'preco'] }
+                { model: Usuario, as: "usuario", attributes: ['id', 'nome', 'email'] },
+                { model: Evento, as: "evento", attributes: ['id', 'nome', 'data', 'local', 'preco'] }
             ]
         });
         if (!ingresso) return res.status(404).json({ error: 'Ingresso não encontrado' });
@@ -185,8 +196,8 @@ router.get('/ingressos/codigo/:codigo', async (req, res) => {
         const ingresso = await Ingresso.findOne({
             where: { codigo: req.params.codigo },
             include: [
-                { model: Usuario, attributes: ['id', 'nome', 'email'] },
-                { model: Evento, attributes: ['id', 'nome', 'data', 'local', 'preco'] }
+                { model: Usuario, as: "usuario", attributes: ['id', 'nome', 'email'] },
+                { model: Evento, as: "evento", attributes: ['id', 'nome', 'data', 'local', 'preco'] }
             ]
         });
         if (!ingresso) return res.status(404).json({ error: 'Ingresso não encontrado' });
@@ -202,7 +213,7 @@ router.get('/usuarios/:userId/ingressos', async (req, res) => {
         const ingressos = await Ingresso.findAll({
             where: { usuarioId: req.params.userId },
             include: [
-                { model: Evento, attributes: ['id', 'nome', 'data', 'local', 'preco'] }
+                { model: Evento, as: "evento", attributes: ['id', 'nome', 'data', 'local', 'preco'] }
             ]
         });
         res.json(ingressos);
@@ -217,7 +228,7 @@ router.get('/eventos/:eventoId/ingressos', async (req, res) => {
         const ingressos = await Ingresso.findAll({
             where: { eventoId: req.params.eventoId },
             include: [
-                { model: Usuario, attributes: ['id', 'nome', 'email'] }
+                { model: Usuario, as: "usuario", attributes: ['id', 'nome', 'email'] }
             ]
         });
         res.json(ingressos);
