@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Evento de Teste</title>
+</head>
+<body>
+    <h1>Criar Evento com Imagem Real</h1>
+    <button id="criarEvento">Criar Evento de Teste</button>
+    
+    <script>
+        document.getElementById('criarEvento').addEventListener('click', async function() {
+            try {
+                // Simular criação de evento com imagem
+                const canvas = document.createElement('canvas');
+                canvas.width = 500;
+                canvas.height = 300;
+                const ctx = canvas.getContext('2d');
+                
+                // Criar uma imagem colorida
+                const gradient = ctx.createLinearGradient(0, 0, 500, 300);
+                gradient.addColorStop(0, '#8B5CF6');
+                gradient.addColorStop(1, '#EC4899');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 500, 300);
+                
+                // Adicionar texto
+                ctx.fillStyle = 'white';
+                ctx.font = '30px Arial';
+                ctx.fillText('Festival 2025', 150, 150);
+                
+                const imagemBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                
+                const eventData = {
+                    titulo: "Festival de Música 2025",
+                    endereco: "Arena São Paulo, São Paulo - SP",
+                    dataEvento: "2025-12-31T22:00:00",
+                    capacidade: 5000,
+                    descricao: "O maior festival de música do ano com artistas nacionais e internacionais",
+                    organizadorId: 2,
+                    imagem: imagemBase64,
+                    ingressos: [
+                        {
+                            tipo: "Pista",
+                            preco: 150.00,
+                            quantidade: 3000,
+                            descricao: "Acesso à pista principal"
+                        },
+                        {
+                            tipo: "Camarote",
+                            preco: 350.00,
+                            quantidade: 800,
+                            descricao: "Área VIP com bar exclusivo"
+                        },
+                        {
+                            tipo: "Backstage",
+                            preco: 600.00,
+                            quantidade: 100,
+                            descricao: "Acesso aos bastidores"
+                        }
+                    ]
+                };
+                
+                const response = await fetch('http://localhost:3000/api/eventos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(eventData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Evento criado com sucesso:', result);
+                    alert('Evento criado com sucesso! ID: ' + result.evento.id);
+                } else {
+                    const error = await response.json();
+                    console.error('❌ Erro ao criar evento:', error);
+                    alert('Erro: ' + error.error);
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                alert('Erro inesperado: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

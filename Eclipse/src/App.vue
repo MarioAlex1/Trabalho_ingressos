@@ -1,7 +1,13 @@
 <script>
 import router from './router'
+
+export default {
+  name: 'App'
+}
 </script>
 
 <template>
-  <router-view />
+  <div :class="{ 'dark': isDark }">
+    <router-view />
+  </div>
 </template>

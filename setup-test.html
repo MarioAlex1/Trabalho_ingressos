@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Setup Sistema Ingressos</title>
+</head>
+<body>
+    <h1>🚀 Configurando Sistema de Ingressos</h1>
+    
+    <script>
+        // Criar usuário organizador de teste
+        const organizador = {
+            id: 1,
+            nome: 'João Silva',
+            email: 'joao@organizador.com',
+            tipoUsuario: 'organizador',
+            empresa: 'EventosPro',
+            token: 'org-token-123'
+        };
+        
+        // Criar usuário cliente de teste
+        const cliente = {
+            id: 2,
+            nome: 'Maria Santos',
+            email: 'maria@cliente.com',
+            tipoUsuario: 'cliente',
+            token: 'cli-token-456'
+        };
+        
+        // Salvar no localStorage
+        localStorage.setItem('user', JSON.stringify(organizador));
+        localStorage.setItem('usuarios', JSON.stringify([organizador, cliente]));
+        localStorage.setItem('eventos', JSON.stringify([]));
+        
+        alert('✅ Sistema configurado! Usuário organizador criado. Acesse /create-event para testar.');
+        
+        // Redirecionar para Vue app
+        setTimeout(() => {
+            window.location.href = 'http://localhost:5173/create-event';
+        }, 2000);
+    </script>
+</body>
+</html>

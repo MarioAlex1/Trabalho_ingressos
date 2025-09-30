@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Página de Pagamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error { color: red; margin: 10px 0; }
+        .success { color: green; margin: 10px 0; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .event-info { background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎫 Teste - Página de Pagamento</h1>
+        
+        <div class="event-info">
+            <h3 id="evento-titulo">Carregando evento...</h3>
+            <p id="evento-data">Data: --</p>
+            <p id="evento-local">Local: --</p>
+            <p id="evento-preco">Preço: --</p>
+        </div>
+
+        <div id="error-msg" class="error" style="display: none;"></div>
+        <div id="success-msg" class="success" style="display: none;"></div>
+
+        <form id="payment-form">
+            <h3>Informações de Pagamento</h3>
+            
+            <div class="form-group">
+                <label for="nome">Nome Completo:</label>
+                <input type="text" id="nome" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf" required placeholder="000.000.000-00">
+            </div>
+            
+            <div class="form-group">
+                <label for="cartao">Número do Cartão:</label>
+                <input type="text" id="cartao" required placeholder="0000 0000 0000 0000">
+            </div>
+            
+            <div class="form-group">
+                <label for="validade">Validade:</label>
+                <input type="text" id="validade" required placeholder="MM/AA">
+            </div>
+            
+            <div class="form-group">
+                <label for="cvv">CVV:</label>
+                <input type="text" id="cvv" required placeholder="123">
+            </div>
+            
+            <button type="submit">Finalizar Compra</button>
+        </form>
+    </div>
+
+    <script>
+        // Simular carregamento de dados do evento
+        function loadEventData() {
+            console.log('🔄 Carregando dados do evento...');
+            
+            // Primeiro tenta da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventoId = urlParams.get('eventoId') || '16'; // Use 16 como padrão para teste
+            
+            console.log('ID do evento:', eventoId);
+            
+            // Buscar dados do evento da API
+            fetch(`http://localhost:3000/api/eventos/${eventoId}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(evento => {
+                    console.log('✅ Evento carregado:', evento);
+                    displayEventData(evento);
+                })
+                .catch(error => {
+                    console.error('❌ Erro ao carregar evento:', error);
+                    showError('Erro ao carregar dados do evento: ' + error.message);
+                    // Dados de fallback para teste
+                    displayEventData({
+                        titulo: 'Evento de Teste',
+                        dataEvento: new Date().toISOString(),
+                        local: 'Local de Teste',
+                        preco: 100.00
+                    });
+                });
+        }
+        
+        function displayEventData(evento) {
+            document.getElementById('evento-titulo').textContent = evento.titulo;
+            document.getElementById('evento-data').textContent = 'Data: ' + new Date(evento.dataEvento).toLocaleString('pt-BR');
+            document.getElementById('evento-local').textContent = 'Local: ' + evento.local;
+            document.getElementById('evento-preco').textContent = 'Preço: R$ ' + (evento.preco || 0).toFixed(2);
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error-msg');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success-msg');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+        
+        // Verificar se usuário está logado
+        function checkUserLogin() {
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (!usuario.id) {
+                showError('Você precisa estar logado para comprar ingressos. Redirecionando...');
+                setTimeout(() => {
+                    window.location.href = 'Eclipse/index.html#/login';
+                }, 2000);
+                return false;
+            }
+            console.log('✅ Usuário logado:', usuario.email);
+            return true;
+        }
+        
+        // Verificar se já possui ingresso
+        async function checkExistingTicket(usuarioId, eventoId) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/ingressos/verificar/${usuarioId}/${eventoId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.temIngresso) {
+                        showError('Você já possui um ingresso para este evento. Cada cliente pode comprar apenas um ingresso por evento.');
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar ingresso existente:', error);
+            }
+            return false;
+        }
+        
+        // Processar pagamento
+        async function processPayment(formData) {
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventoId = urlParams.get('eventoId') || '16';
+            
+            // Verificar ingresso existente antes de processar
+            const hasExisting = await checkExistingTicket(usuario.id, eventoId);
+            if (hasExisting) {
+                return;
+            }
+            
+            const ingressoData = {
+                usuarioId: usuario.id,
+                eventoId: parseInt(eventoId),
+                preco: 100.00, // Preço de teste
+                formaPagamento: 'Cartão de Crédito'
+            };
+            
+            console.log('Enviando dados do ingresso:', ingressoData);
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/ingressos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(ingressoData)
+                });
+                
+                if (response.ok) {
+                    const ingresso = await response.json();
+                    showSuccess(`✅ Pagamento realizado com sucesso! Código do ingresso: ${ingresso.codigo}`);
+                    
+                    // Limpar formulário
+                    document.getElementById('payment-form').reset();
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erro ao processar pagamento');
+                }
+            } catch (error) {
+                console.error('❌ Erro no pagamento:', error);
+                showError('Erro ao processar pagamento: ' + error.message);
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Página de teste carregada');
+            
+            if (checkUserLogin()) {
+                loadEventData();
+            }
+            
+            document.getElementById('payment-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+                
+                console.log('Dados do formulário:', data);
+                processPayment(data);
+            });
+        });
+        
+        // Testes automáticos
+        console.log('🧪 Executando testes básicos...');
+        
+        // Teste 1: Verificar se o backend está respondendo
+        fetch('http://localhost:3000/api/teste')
+            .then(response => response.json())
+            .then(data => console.log('✅ Backend respondendo:', data))
+            .catch(error => console.error('❌ Backend não está respondendo:', error));
+            
+        // Teste 2: Verificar eventos
+        fetch('http://localhost:3000/api/eventos')
+            .then(response => response.json())
+            .then(data => console.log('✅ Eventos disponíveis:', data.length))
+            .catch(error => console.error('❌ Erro ao buscar eventos:', error));
+    </script>
+</body>
+</html>

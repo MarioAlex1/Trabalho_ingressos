@@ -1,0 +1,9 @@
+{
+  "titulo": "Teste Frontend Simulation",
+  "endereco": "Endereço de Teste",
+  "dataEvento": "2025-12-31T23:00:00",
+  "capacidade": 100,
+  "imagem": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "descricao": "Teste de simulação do frontend",
+  "organizadorId": 2
+}
