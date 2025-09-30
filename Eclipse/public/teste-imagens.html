@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Direto de Imagens</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .evento { border: 1px solid #ccc; margin: 10px; padding: 15px; border-radius: 8px; }
+        .imagem { width: 200px; height: 120px; object-fit: cover; border: 1px solid #ddd; }
+        .sem-imagem { width: 200px; height: 120px; background: linear-gradient(45deg, #8B5CF6, #EC4899); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Teste Direto - Eventos com Imagens</h1>
+    <button onclick="carregarEventos()">🔄 Carregar Eventos</button>
+    <div id="status"></div>
+    <div id="eventos"></div>
+
+    <script>
+        async function carregarEventos() {
+            const statusDiv = document.getElementById('status');
+            const eventosDiv = document.getElementById('eventos');
+            
+            statusDiv.innerHTML = '⏳ Carregando...';
+            eventosDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/eventos');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const eventos = await response.json();
+                statusDiv.innerHTML = `✅ ${eventos.length} eventos carregados`;
+                
+                eventos.forEach((evento, index) => {
+                    const eventoDiv = document.createElement('div');
+                    eventoDiv.className = 'evento';
+                    
+                    const temImagem = evento.imagem && evento.imagem.startsWith('data:image');
+                    
+                    eventoDiv.innerHTML = `
+                        <h3>${evento.titulo}</h3>
+                        <p><strong>ID:</strong> ${evento.id}</p>
+                        <p><strong>Local:</strong> ${evento.endereco}</p>
+                        <p><strong>Tem imagem:</strong> ${temImagem ? '✅ Sim' : '❌ Não'}</p>
+                        ${evento.imagem ? `<p><strong>Tipo:</strong> ${evento.imagem.substring(0, 25)}...</p>` : ''}
+                        
+                        ${temImagem ? 
+                            `<img src="${evento.imagem}" alt="${evento.titulo}" class="imagem" 
+                                 onload="console.log('✅ Imagem ${evento.id} carregou')"
+                                 onerror="console.log('❌ Erro na imagem ${evento.id}')" />` :
+                            `<div class="sem-imagem">Sem Imagem</div>`
+                        }
+                    `;
+                    
+                    eventosDiv.appendChild(eventoDiv);
+                });
+                
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Erro: ${error.message}`;
+                console.error('Erro completo:', error);
+            }
+        }
+        
+        // Carregar automaticamente ao abrir a página
+        window.onload = carregarEventos;
+    </script>
+</body>
+</html>

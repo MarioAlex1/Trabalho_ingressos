@@ -8,24 +8,32 @@ const Evento = sequelize.define("Evento", {
     autoIncrement: true,
     primaryKey: true
   },
-  nome: {
+  titulo: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  data: {
+  endereco: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  dataEvento: {
     type: DataTypes.DATE,
-    allowNull: false
-  },
-  local: {
-    type: DataTypes.STRING,
     allowNull: false
   },
   capacidade: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  preco: {
-    type: DataTypes.FLOAT,
+  imagem: {
+    type: DataTypes.TEXT('long'),
+    allowNull: true
+  },
+  descricao: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  organizadorId: {
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   cancelado: {

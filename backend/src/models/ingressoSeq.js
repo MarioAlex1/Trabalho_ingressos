@@ -20,6 +20,30 @@ const Ingresso = sequelize.define("Ingresso", {
   usado: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  usuarioId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'usuarios',
+      key: 'id'
+    }
+  },
+  eventoId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'eventos',
+      key: 'id'
+    }
+  },
+  tipoIngressoId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'tipos_ingressos',
+      key: 'id'
+    }
   }
 }, {
   tableName: "ingressos",

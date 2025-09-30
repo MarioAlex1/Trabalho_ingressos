@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico - Página de Pagamento</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: 0 auto; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .log { background: #f8f9fa; padding: 15px; border-left: 4px solid #007cba; font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico do Sistema de Ingressos</h1>
+        
+        <div id="results"></div>
+        
+        <h3>Testes Disponíveis:</h3>
+        <button onclick="testBackend()">1. Testar Backend</button>
+        <button onclick="testLogin()">2. Verificar Login</button>
+        <button onclick="testEvent()">3. Buscar Evento</button>
+        <button onclick="testTicketCheck()">4. Verificar Ingresso</button>
+        <button onclick="testPurchase()">5. Testar Compra</button>
+        <button onclick="runAllTests()">🚀 Executar Todos</button>
+        
+        <h3>Log de Execução:</h3>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        let logDiv;
+        let resultsDiv;
+        
+        function init() {
+            logDiv = document.getElementById('log');
+            resultsDiv = document.getElementById('results');
+            log('🚀 Sistema de diagnóstico iniciado');
+            log('📍 URL atual: ' + window.location.href);
+        }
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            const logMessage = `[${timestamp}] ${message}`;
+            console.log(logMessage);
+            if (logDiv) {
+                logDiv.textContent += logMessage + '\n';
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+        }
+        
+        function showResult(title, success, message) {
+            const statusClass = success ? 'success' : 'error';
+            const icon = success ? '✅' : '❌';
+            const html = `<div class="status ${statusClass}"><strong>${icon} ${title}</strong><br>${message}</div>`;
+            resultsDiv.innerHTML += html;
+        }
+        
+        async function testBackend() {
+            log('🧪 Testando conexão com backend...');
+            try {
+                const response = await fetch('http://localhost:3000/api/teste');
+                const data = await response.json();
+                log('✅ Backend respondeu: ' + JSON.stringify(data));
+                showResult('Backend', true, 'Servidor backend está funcionando corretamente');
+                return true;
+            } catch (error) {
+                log('❌ Erro no backend: ' + error.message);
+                showResult('Backend', false, 'Servidor backend não está respondendo: ' + error.message);
+                return false;
+            }
+        }
+        
+        function testLogin() {
+            log('🧪 Verificando login do usuário...');
+            const usuario = localStorage.getItem('usuario');
+            if (usuario) {
+                try {
+                    const user = JSON.parse(usuario);
+                    log('✅ Usuário logado: ' + JSON.stringify(user));
+                    showResult('Login', true, `Usuário logado: ${user.email || user.nome || 'ID: ' + user.id}`);
+                    return user;
+                } catch (error) {
+                    log('❌ Erro ao parsear dados do usuário: ' + error.message);
+                    showResult('Login', false, 'Dados de usuário corrompidos no localStorage');
+                    return null;
+                }
+            } else {
+                log('❌ Usuário não está logado');
+                showResult('Login', false, 'Usuário não está logado. Faça login primeiro.');
+                return null;
+            }
+        }
+        
+        async function testEvent() {
+            log('🧪 Testando busca de evento...');
+            const eventoId = new URLSearchParams(window.location.search).get('eventoId') || '16';
+            log('🔍 Buscando evento ID: ' + eventoId);
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/eventos/${eventoId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const evento = await response.json();
+                log('✅ Evento encontrado: ' + JSON.stringify(evento));
+                showResult('Evento', true, `Evento encontrado: "${evento.titulo}" - R$ ${evento.preco || 0}`);
+                return evento;
+            } catch (error) {
+                log('❌ Erro ao buscar evento: ' + error.message);
+                showResult('Evento', false, 'Erro ao buscar evento: ' + error.message);
+                return null;
+            }
+        }
+        
+        async function testTicketCheck() {
+            log('🧪 Testando verificação de ingresso existente...');
+            const user = testLogin();
+            if (!user) {
+                showResult('Verificação Ingresso', false, 'Usuário não está logado');
+                return false;
+            }
+            
+            const eventoId = new URLSearchParams(window.location.search).get('eventoId') || '16';
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/ingressos/verificar/${user.id}/${eventoId}`);
+                const data = await response.json();
+                log('📊 Verificação: ' + JSON.stringify(data));
+                
+                if (data.temIngresso) {
+                    showResult('Verificação Ingresso', false, 'BLOQUEADO: Você já possui um ingresso para este evento');
+                    return false;
+                } else {
+                    showResult('Verificação Ingresso', true, 'OK: Você pode comprar um ingresso para este evento');
+                    return true;
+                }
+            } catch (error) {
+                log('❌ Erro na verificação: ' + error.message);
+                showResult('Verificação Ingresso', false, 'Erro na verificação: ' + error.message);
+                return false;
+            }
+        }
+        
+        async function testPurchase() {
+            log('🧪 Testando compra de ingresso...');
+            const user = testLogin();
+            if (!user) {
+                showResult('Compra', false, 'Usuário não está logado');
+                return false;
+            }
+            
+            const eventoId = new URLSearchParams(window.location.search).get('eventoId') || '16';
+            
+            // Verificar se já possui ingresso primeiro
+            const canPurchase = await testTicketCheck();
+            if (!canPurchase) {
+                return false;
+            }
+            
+            const ingressoData = {
+                usuarioId: user.id,
+                eventoId: parseInt(eventoId),
+                preco: 100.00,
+                formaPagamento: 'Cartão de Crédito (Teste)'
+            };
+            
+            log('💳 Tentando criar ingresso: ' + JSON.stringify(ingressoData));
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/ingressos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(ingressoData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                
+                const ingresso = await response.json();
+                log('✅ Ingresso criado: ' + JSON.stringify(ingresso));
+                showResult('Compra', true, `Ingresso criado com sucesso! Código: ${ingresso.codigo}`);
+                return ingresso;
+            } catch (error) {
+                log('❌ Erro na compra: ' + error.message);
+                showResult('Compra', false, 'Erro na compra: ' + error.message);
+                return null;
+            }
+        }
+        
+        async function runAllTests() {
+            resultsDiv.innerHTML = '';
+            log('\n🔄 === INICIANDO TODOS OS TESTES ===');
+            
+            const backendOk = await testBackend();
+            if (!backendOk) {
+                log('⛔ Parando testes - backend não disponível');
+                return;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const user = testLogin();
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const event = await testEvent();
+            
+            if (user && event) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await testTicketCheck();
+            }
+            
+            log('🏁 === TESTES CONCLUÍDOS ===\n');
+        }
+        
+        // Executar ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+            
+            // Auto-executar teste básico
+            setTimeout(() => {
+                log('🔄 Executando teste automático...');
+                runAllTests();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

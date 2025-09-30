@@ -65,13 +65,14 @@
     </nav>
     <!-- Menu Icon -->
     <div class="mt-2 md:mt-0">
-      <Sidebar @toggle-dark="$emit('toggle-dark', $event)" />
+      <Sidebar />
     </div>
   </header>
 </template>
 <script>
 import Sidebar from "./Sidebar.vue";
-import logo from "@/assets/Logo1.png";
+// import logo from "@/assets/Logo1.png";
+const logo = '/src/assets/Logo1.png'; // Caminho relativo temporário
 
 export default {
   components: {

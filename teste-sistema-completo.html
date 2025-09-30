@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Sistema de Ingressos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6">🎫 Teste do Sistema de Ingressos</h1>
+        
+        <!-- Seção de Login -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">1️⃣ Configurar Usuário</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <button id="loginOrganizador" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    👨‍💼 Login como Organizador
+                </button>
+                <button id="loginCliente" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    👤 Login como Cliente
+                </button>
+            </div>
+            <div id="statusUsuario" class="mt-4 p-4 bg-gray-100 rounded">
+                Status: Nenhum usuário logado
+            </div>
+        </div>
+
+        <!-- Seção de Criar Evento -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">2️⃣ Criar Evento</h2>
+            <div id="criarEventoSection">
+                <form id="formEvento">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="titulo" placeholder="Título do Evento" class="p-2 border rounded" required>
+                        <input type="text" id="endereco" placeholder="Endereço" class="p-2 border rounded" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <input type="number" id="capacidade" placeholder="Capacidade" class="p-2 border rounded" required>
+                        <input type="datetime-local" id="dataEvento" class="p-2 border rounded" required>
+                    </div>
+                    <textarea id="descricao" placeholder="Descrição do evento" class="w-full p-2 border rounded mb-4" required></textarea>
+                    
+                    <!-- Ingresso -->
+                    <div class="border p-4 rounded mb-4">
+                        <h3 class="font-semibold mb-2">Ingresso:</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <input type="text" id="tipoIngresso" placeholder="Tipo (ex: VIP)" class="p-2 border rounded" required>
+                            <input type="number" id="precoIngresso" step="0.01" placeholder="Preço" class="p-2 border rounded" required>
+                            <input type="number" id="quantidadeIngresso" placeholder="Quantidade" class="p-2 border rounded" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600">
+                        🎪 Criar Evento
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Seção de Eventos Criados -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">3️⃣ Eventos Criados</h2>
+            <div id="listaEventos">
+                Nenhum evento criado ainda.
+            </div>
+            <button id="limparEventos" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                🗑️ Limpar Todos os Eventos
+            </button>
+        </div>
+
+        <!-- Status de Permissão -->
+        <div id="statusPermissao" class="mt-6 p-4 rounded">
+        </div>
+    </div>
+
+    <script>
+        // ========= SIMULAÇÃO DO SISTEMA DE PERMISSÕES =========
+        
+        // Login como Organizador
+        document.getElementById('loginOrganizador').onclick = function() {
+            const user = {
+                id: 1,
+                nome: 'João Silva',
+                email: 'joao@organizador.com',
+                tipoUsuario: 'organizador',
+                token: 'org-token-123'
+            };
+            localStorage.setItem('user', JSON.stringify(user));
+            atualizarStatusUsuario();
+            verificarPermissoes();
+        };
+
+        // Login como Cliente
+        document.getElementById('loginCliente').onclick = function() {
+            const user = {
+                id: 2,
+                nome: 'Maria Santos',
+                email: 'maria@cliente.com',
+                tipoUsuario: 'cliente',
+                token: 'cli-token-456'
+            };
+            localStorage.setItem('user', JSON.stringify(user));
+            atualizarStatusUsuario();
+            verificarPermissoes();
+        };
+
+        // Atualizar Status do Usuário
+        function atualizarStatusUsuario() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const statusDiv = document.getElementById('statusUsuario');
+            
+            if (user.id) {
+                statusDiv.innerHTML = `
+                    ✅ Logado como: <strong>${user.nome}</strong><br>
+                    📧 Email: ${user.email}<br>
+                    👥 Tipo: <span class="font-bold ${user.tipoUsuario === 'organizador' ? 'text-blue-600' : 'text-green-600'}">${user.tipoUsuario}</span>
+                `;
+                statusDiv.className = 'mt-4 p-4 bg-green-100 rounded';
+            } else {
+                statusDiv.innerHTML = 'Status: Nenhum usuário logado';
+                statusDiv.className = 'mt-4 p-4 bg-gray-100 rounded';
+            }
+        }
+
+        // Verificar Permissões
+        function verificarPermissoes() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const criarEventoSection = document.getElementById('criarEventoSection');
+            const statusPermissao = document.getElementById('statusPermissao');
+            
+            if (!user.id) {
+                criarEventoSection.innerHTML = '<p class="text-gray-600">Faça login para continuar</p>';
+                statusPermissao.innerHTML = '⚠️ Nenhum usuário logado';
+                statusPermissao.className = 'mt-6 p-4 bg-yellow-100 text-yellow-800 rounded';
+                return;
+            }
+            
+            if (user.tipoUsuario === 'organizador') {
+                criarEventoSection.style.display = 'block';
+                statusPermissao.innerHTML = '✅ Organizador: Pode criar eventos';
+                statusPermissao.className = 'mt-6 p-4 bg-green-100 text-green-800 rounded';
+            } else {
+                criarEventoSection.innerHTML = '<p class="text-red-600">❌ Apenas organizadores podem criar eventos</p>';
+                statusPermissao.innerHTML = '❌ Cliente: Não pode criar eventos';
+                statusPermissao.className = 'mt-6 p-4 bg-red-100 text-red-800 rounded';
+            }
+        }
+
+        // Criar Evento
+        document.getElementById('formEvento').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (user.tipoUsuario !== 'organizador') {
+                alert('❌ Apenas organizadores podem criar eventos!');
+                return;
+            }
+
+            const evento = {
+                id: Date.now(),
+                titulo: document.getElementById('titulo').value,
+                endereco: document.getElementById('endereco').value,
+                capacidade: parseInt(document.getElementById('capacidade').value),
+                dataEvento: document.getElementById('dataEvento').value,
+                descricao: document.getElementById('descricao').value,
+                organizadorId: user.id,
+                organizadorNome: user.nome,
+                ingressos: [{
+                    tipo: document.getElementById('tipoIngresso').value,
+                    preco: parseFloat(document.getElementById('precoIngresso').value),
+                    quantidade: parseInt(document.getElementById('quantidadeIngresso').value)
+                }],
+                dataCriacao: new Date().toISOString()
+            };
+
+            // Salvar evento
+            const eventos = JSON.parse(localStorage.getItem('eventos') || '[]');
+            eventos.push(evento);
+            localStorage.setItem('eventos', JSON.stringify(eventos));
+
+            alert('✅ Evento criado com sucesso!');
+            document.getElementById('formEvento').reset();
+            atualizarListaEventos();
+        };
+
+        // Atualizar Lista de Eventos
+        function atualizarListaEventos() {
+            const eventos = JSON.parse(localStorage.getItem('eventos') || '[]');
+            const listaDiv = document.getElementById('listaEventos');
+            
+            if (eventos.length === 0) {
+                listaDiv.innerHTML = 'Nenhum evento criado ainda.';
+                return;
+            }
+
+            listaDiv.innerHTML = eventos.map(evento => `
+                <div class="border p-4 rounded mb-2 bg-gray-50">
+                    <h3 class="font-bold text-lg">${evento.titulo}</h3>
+                    <p><strong>📍</strong> ${evento.endereco}</p>
+                    <p><strong>📅</strong> ${new Date(evento.dataEvento).toLocaleString()}</p>
+                    <p><strong>👥</strong> Capacidade: ${evento.capacidade}</p>
+                    <p><strong>👨‍💼</strong> Organizador: ${evento.organizadorNome}</p>
+                    <p><strong>🎫</strong> Ingresso: ${evento.ingressos[0].tipo} - R$ ${evento.ingressos[0].preco} (${evento.ingressos[0].quantidade} disponíveis)</p>
+                    <small class="text-gray-600">Criado em: ${new Date(evento.dataCriacao).toLocaleString()}</small>
+                </div>
+            `).join('');
+        }
+
+        // Limpar Eventos
+        document.getElementById('limparEventos').onclick = function() {
+            localStorage.removeItem('eventos');
+            atualizarListaEventos();
+            alert('🗑️ Todos os eventos foram removidos!');
+        };
+
+        // Inicializar
+        atualizarStatusUsuario();
+        verificarPermissoes();
+        atualizarListaEventos();
+
+        console.log('🎫 Sistema de Ingressos carregado!');
+        console.log('📋 Para testar:');
+        console.log('1. Clique em "Login como Organizador"');
+        console.log('2. Preencha o formulário de evento');
+        console.log('3. Clique em "Criar Evento"');
+        console.log('4. Teste também com "Login como Cliente" para ver a restrição');
+    </script>
+</body>
+</html>

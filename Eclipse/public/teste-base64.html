@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Base64</title>
+</head>
+<body>
+    <h1>🧪 Teste de Imagem Base64</h1>
+    
+    <h2>Teste 1: Imagem PNG pequena</h2>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" 
+         alt="Teste PNG" style="width: 100px; height: 100px; border: 1px solid red;" />
+    
+    <h2>Teste 2: Imagem SVG do evento</h2>
+    <img src="data:image/svg+xml;base64,CiAgICAgIDxzdmcgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICAgICAgPGRlZnM+CiAgICAgICAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQxIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzhCNUNGNjtzdG9wLW9wYWNpdHk6MSIgLz4KICAgICAgICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRUM0ODk5O3N0b3Atb3BhY2l0eToxIiAvPgogICAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgICAgICA8L2RlZnM+CiAgICAgICAgPHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9InVybCgjZ3JhZDEpIiAvPgogICAgICAgIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiAKICAgICAgICAgICAgICBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzYiIGZpbGw9IndoaXRlIiBmb250LXdlaWdodD0iYm9sZCI+CiAgICAgICAgICBGRVNUSVZBTCAyMDI1CiAgICAgICAgPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9IjUwJSIgeT0iNzAlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiAKICAgICAgICAgICAgICBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIj4KICAgICAgICAgIEFyZW5hIFPDo28gUGF1bG8KICAgICAgICA8L3RleHQ+CiAgICAgIDwvc3ZnPgogICAg" 
+         alt="Festival SVG" style="width: 200px; height: 120px; border: 1px solid blue;" />
+    
+    <h2>Teste 3: Fetch da API e exibir</h2>
+    <button onclick="testarAPI()">🔄 Carregar da API</button>
+    <div id="resultado"></div>
+    
+    <script>
+        async function testarAPI() {
+            try {
+                const response = await fetch('http://localhost:3000/api/eventos');
+                const eventos = await response.json();
+                
+                const eventosComImagem = eventos.filter(e => e.imagem && e.imagem.startsWith('data:image'));
+                
+                document.getElementById('resultado').innerHTML = 
+                    `<p>📊 Total: ${eventos.length} eventos | 🖼️ Com imagem: ${eventosComImagem.length}</p>` +
+                    eventosComImagem.map(evento => 
+                        `<div style="margin: 10px; padding: 10px; border: 1px solid #ccc;">
+                            <h4>${evento.titulo}</h4>
+                            <img src="${evento.imagem}" alt="${evento.titulo}" 
+                                 style="width: 150px; height: 90px; object-fit: cover;" 
+                                 onload="console.log('✅ ${evento.titulo} carregou')"
+                                 onerror="console.log('❌ ${evento.titulo} falhou')" />
+                        </div>`
+                    ).join('');
+                    
+            } catch (error) {
+                document.getElementById('resultado').innerHTML = `❌ Erro: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
