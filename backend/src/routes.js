@@ -603,7 +603,8 @@ router.get('/eventos/:eventoId/tipos-ingressos', async (req, res) => {
     } catch (error) {
         console.error('❌ Erro ao buscar tipos de ingressos:', error);
         res.status(500).json({ error: 'Erro ao buscar tipos de ingressos', details: error.message });
-
+    }
+});
 // ===================== ENDPOINTS DE RELATÓRIOS =====================
 
 // Relatório de vendas totais
